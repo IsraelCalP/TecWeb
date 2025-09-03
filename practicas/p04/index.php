@@ -118,6 +118,33 @@
 	        echo "Variable \$b: $b <br>";
 	        echo "Variable \$c: $c <br>";
     ?>
+<?php
+            echo "<h2>Inciso 6. Compronar valor booleano variables</h2>";
+            $a = "0";
+            $b = "TRUE";
+            $c = FALSE;
+            $d = ($a OR $b);
+            $e = ($a AND $c);
+            $f = ($a XOR $b);
 
+            echo "Variable \$a: ", var_dump($a);
+            echo "<br>";
+            echo "Variable \$b: ", var_dump($b);
+            echo "<br>";
+            echo "Variable \$c: ", var_dump($c);
+            echo "<br>";
+            echo "Variable \$d: ", var_dump($d);
+            echo "<br>";
+            echo "Variable \$e: ", var_dump($e);
+            echo "<br>";
+            echo "Variable \$f: ", var_dump($f);
+    ?>
+
+    <?php
+            echo "<h2>Transformación de valor booleano de la variable $c y $e</h2>";
+            echo "Variable \$c: " . (int)$c;
+            echo "<br>";
+            echo "Variable \$e: " . (int)$e;
+    ?>
 </body>
 </html>
