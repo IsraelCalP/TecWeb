@@ -75,5 +75,36 @@
 
             unset($a, $b, $c, $z);
     ?>
+     <?php
+    	    echo "<h2>Inciso 4. Mostrar contenido de variables después de la asignación con \$GLOBALS</h2>";
+
+    	    $GLOBALS['a'] = "PHP5";
+	        echo "Variable \$a: " . $GLOBALS['a'] . "<br>";
+	        $GLOBALS['z'][] = &$GLOBALS['a'];
+	        echo "Arreglo \$z:<br>";
+	        echo "<pre>";
+	        print_r($GLOBALS['z']);
+	        echo "</pre>";
+
+	        $GLOBALS['b'] = "5a version de PHP";
+	        echo "Variable \$b: " . $GLOBALS['b'] . "<br>";
+
+	        @$GLOBALS['c'] = $GLOBALS['b'] * 10;
+	        echo "Variable \$c: " . $GLOBALS['c'] . "<br>";
+
+	        $GLOBALS['a'] .= $GLOBALS['b'];
+	        echo "Variable \$a después de concatenar \$b: " . $GLOBALS['a'] . "<br>";
+
+	        @$GLOBALS['b'] *= $GLOBALS['c'];
+	        echo "Variable \$b después de multiplicar por \$c: " . $GLOBALS['b'] . "<br>";
+
+	        $GLOBALS['z'][0] = "MySQL";
+	        echo "Arreglo \$z después de cambiar \$z[0]:<br>";
+	        echo "<pre>";
+	        print_r($GLOBALS['z']);
+	        echo "</pre>";
+
+	        unset($GLOBALS['a'], $GLOBALS['b'], $GLOBALS['c'], $GLOBALS['z']);
+    ?>   
 </body>
 </html>
