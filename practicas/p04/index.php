@@ -141,10 +141,24 @@
     ?>
 
     <?php
-            echo "<h2>Transformación de valor booleano de la variable $c y $e</h2>";
+            echo "<h2>Transformación de valor booleano de la variable " . (int)$c . " y " . (int)$e . "</h2>";
             echo "Variable \$c: " . (int)$c;
             echo "<br>";
             echo "Variable \$e: " . (int)$e;
     ?>
+    <?php
+            echo "<h2>Inciso 7: Uso de variable $_SERVER</h2>";
+            echo "Versión de apache: " . $_SERVER['SERVER_SOFTWARE'];
+            echo "<br>";
+            echo "Versión de php: " . phpversion();
+    ?>
+
+    <?php
+            echo "Nombre del sistema operativo: " . PHP_OS;
+    ?>
+    <?php
+            echo "Idioma de navegador: " . $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+    ?>
+
 </body>
 </html>
