@@ -16,39 +16,44 @@
 
     <p>¿Quieres cambiar tus viejos tenis por un par personalizado de Tenis Mike&#174;?<br><br>Justifica el por qué tus tenis se <em>tienen que</em> ir y tú puedes ser uno de los diez afortunados ganadores.</p>
   <form action="http://52.43.117.247/neo/classroom/tw/concurso.php" method="post">
-    <p>Información del Participante</p>
-
-    <ul>
-    <li>Nombre: <input type="text" name="name"></li>
-    <li>Dirección de E-mail: <input type="email" name="email"></li>
+     <h2>Información de Participación:</h2>
+    <fieldset>
+      <legend>Información Personal</legend>
+      <ul>
+        <li>Nombre: <input type="text" name="name"></li>
+        <li>Dirección de E-mail: <input type="email" name="email"></li>
     <li>Número Telefónico: <input type="tel" name="phone"></li>
     <li>Mis tenis son tan feos porque... <br>
       <textarea name="story" rows="4" cols="60" maxlength="300" placeholder="No más de 300 caracteres de longitud"></textarea>
     </li>
     </ul>
+    </fieldset>
 
     <h2>Diseña tus Mike personalizados:</h2>
-
-    <p>Diseño personalizado del Tenis</p>
-
-    <p>Color <em>(escoge uno)</em>:</p>
+    <fieldset>
+      <legend> Diseño Personalizado del Tenis </legend>
+      <fieldset>
+      <legend>Color <em>(escoge uno)</em>:</legend>
       <ul>
       <li><input type="radio" name="color" value="Rojo" checked>Rojo</li>
       <li><input type="radio" name="color" value="Azul">Azul</li>
       <li><input type="radio" name="color" value="Negro">Negro</li>
       <li><input type="radio" name="color" value="Plateado">Plateado</li>
       </ul>
-
-    <p>Características <em>(escoge tantas como quieras)</em>:</p>
+    </fieldset>
+    <fieldset>
+      <legend>Características <em>(escoge tantas como quieras)</em>:</legend>
       <ul>
       <li><input type="checkbox" name="features[]" value="cordones_brillantes">Cordones brillantes</li>
       <li><input type="checkbox" name="features[]" value="logo_metalico" checked>Logo metálico</li>
       <li><input type="checkbox" name="features[]" value="suela_luminosa">Suela luminosa</li>
       <li><input type="checkbox" name="features[]" value="wifi_integrado">WiFi integrado</li>
       </ul>
-
-    <p>Talla</p>
-    <p>Las medidas reflejan el estándar masculino:
+    </fieldset>
+    <fieldset>
+      <legend>Talla</legend>
+      <label>
+      Las medidas reflejan el estándar masculino:
       <select name="size">
         <option value="3">3</option>
         <option value="4">4</option>
@@ -59,8 +64,10 @@
         <option value="9">9</option>
         <option value="10">10</option>
         <option value="11">11</option>
-      </select>  
-    </p>
+      </select>
+    </label>
+    </fieldset>
+  </fieldset>
     <p><input type="submit" value="¡Chidos mis Tenis!">
       <input type="reset" value="Limpiar"></p>
   </form>
