@@ -33,7 +33,7 @@
 
     <p>Color <em>(escoge uno)</em>:</p>
       <ul>
-      <li><input type="radio" name="color" value="Rojo">Rojo</li>
+      <li><input type="radio" name="color" value="Rojo" checked>Rojo</li>
       <li><input type="radio" name="color" value="Azul">Azul</li>
       <li><input type="radio" name="color" value="Negro">Negro</li>
       <li><input type="radio" name="color" value="Plateado">Plateado</li>
@@ -41,10 +41,10 @@
 
     <p>Características <em>(escoge tantas como quieras)</em>:</p>
       <ul>
-      <li>Cordones brillantes</li>
-      <li>Logo metálico</li>
-      <li>Suela luminosa</li>
-      <li>WiFi integrado</li>
+      <li><input type="checkbox" name="features[]" value="cordones_brillantes">Cordones brillantes</li>
+      <li><input type="checkbox" name="features[]" value="logo_metalico" checked>Logo metálico</li>
+      <li><input type="checkbox" name="features[]" value="suela_luminosa">Suela luminosa</li>
+      <li><input type="checkbox" name="features[]" value="wifi_integrado">WiFi integrado</li>
       </ul>
 
     <p>Talla</p>
