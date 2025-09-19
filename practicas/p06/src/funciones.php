@@ -30,3 +30,22 @@ function secuencia()
 
     return [$matriz, $iteracion, $numgenerado];
 }
+
+function multiploAleatorioWhile($multiplo)
+{
+    $num = rand(1, 1000);
+    while ($num % $multiplo != 0) {
+        $num = rand(1, 1000);
+    }
+    return $num;
+}
+
+
+function multiploAleatorioDoWhile($multiplo)
+{
+    do {
+        $num = rand(1, 1000);
+    } while ($num % $multiplo != 0);
+    return $num;
+}
+

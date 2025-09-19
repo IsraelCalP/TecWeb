@@ -36,5 +36,28 @@
 
     <hr />
 
+     <h2>3. Múltiplo aleatorio con while y do-while</h2>
+    <p>Para probar, agrega en la URL: ?multiplo=número que desees buscar</p>
+    <?php
+    if (isset($_GET['multiplo'])) {
+        $multiplo = $_GET['multiplo'];
+        if (is_numeric($multiplo) && $multiplo > 0) {
+            
+            $resultadoWhile = multiploAleatorioWhile($multiplo);
+            echo "<h3>Con ciclo while</h3>";
+            echo "<p>El primer múltiplo de $multiplo encontrado es <b>$resultadoWhile</b>.</p>";
+
+        
+            $resultadoDoWhile = multiploAleatorioDoWhile($multiplo);
+            echo "<h3>Con ciclo do-while</h3>";
+            echo "<p>El primer múltiplo de $multiplo encontrado es <b>$resultadoDoWhile</b>.</p>";
+        }
+    }
+    ?>
+
+    <hr />
+
+    
+
 </body>
 </html>
