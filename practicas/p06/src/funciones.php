@@ -57,3 +57,13 @@ function arregloAcsii()
     }
     return $arreglo;
 }
+
+function sexoEdad($edad, $sexo)
+{
+    
+    if (strtolower($sexo) == 'femenino' && $edad >= 18 && $edad <= 35) {
+        return 'Bienvenida, usted está en el rango de edad permitido.';
+    } else {
+        return 'Lo sentimos, no cumple con los requisitos (sexo "femenino" y edad entre 18-35).';
+    }
+}

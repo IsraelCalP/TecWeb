@@ -72,5 +72,32 @@
 
     <hr />
 
+    <h2>5. Identificar por sexo y edad</h2>
+    <form action="index.php" method="post">
+        Edad: <input type="text" name="edad" required="required" /><br /><br />
+        Sexo: 
+        <select name="sexo">
+            <option value="femenino">Femenino</option>
+            <option value="masculino">Masculino</option>
+        </select>
+        <br /><br />
+        <input type="submit" name="submit5" value="Verificar" />
+    </form>
+    <br />
+    <?php
+        
+        if (isset($_POST['submit5'])) {
+            $edad = $_POST['edad'];
+            $sexo = $_POST['sexo'];
+            
+            
+            $mensaje = sexoEdad($edad, $sexo); 
+            
+            
+            echo "<b>Resultado:</b> " . htmlspecialchars($mensaje);
+        }
+    ?>
+
+    <hr />
 </body>
 </html>
