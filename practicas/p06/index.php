@@ -19,5 +19,22 @@
             echo multiplo($num) ? "$num es múltiplo de 5 y 7." : "$num no es múltiplo de 5 y 7.";
         }
     ?>
+    <hr />
+
+    <h2>2. Secuencia aleatoria (impar, par, impar)</h2>
+    <?php
+       
+        list($matriz, $iteracion, $numgenerado) = secuencia();
+
+        echo '<table border="1" cellpadding="5">';
+        foreach ($matriz as $fila) {
+            echo "<tr><td>" . implode("</td><td>", $fila) . "</td></tr>";
+        }
+        echo "</table>";
+        echo "<p><b>$numgenerado</b> números generados en <b>$iteracion</b> iteraciones.</p>";
+    ?>
+
+    <hr />
+
 </body>
 </html>
