@@ -57,7 +57,20 @@
 
     <hr />
 
-    
+    <h2>4. Arreglo de letras con ASCII</h2>
+    <?php
+        
+        $arregloLetras = arregloAcsii();
+        
+        echo '<table border="1" cellpadding="5">';
+        echo '<tr><th>Código ASCII</th><th>Letra</th></tr>';
+        foreach ($arregloLetras as $key => $value) {
+            echo "<tr><td>$key</td><td>$value</td></tr>";
+        }
+        echo '</table>';
+    ?>
+
+    <hr />
 
 </body>
 </html>
