@@ -8,7 +8,7 @@
 	if (!empty($id))
 	{
 		/** SE CREA EL OBJETO DE CONEXION */
-		@$link = new mysqli('localhost', 'root', '12345678a', 'marketzone');	
+		@$link = new mysqli('localhost', 'root', 'Isra2818', 'marketzone');	
 
 		/** comprobar la conexión */
 		if ($link->connect_errno) 
@@ -61,7 +61,7 @@
 						<td><?= $row['modelo'] ?></td>
 						<td><?= $row['precio'] ?></td>
 						<td><?= $row['unidades'] ?></td>
-						<td><?= utf8_encode($row['detalles']) ?></td>
+						<td><?= $row['detalles'] ?></td>
 						<td><img src=<?= $row['imagen'] ?> ></td>
 					</tr>
 				</tbody>
