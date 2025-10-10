@@ -26,9 +26,13 @@ if ($stmt->get_result()->num_rows > 0) {
 } else {
     $stmt->close();
 
-    /** Insertar nuevo producto SIN NOMBRES DE COLUMNAS */
-    $sql = "INSERT INTO productos 
-            VALUES (NULL, '{$nombre}', '{$marca}', '{$modelo}', {$precio}, '{$detalles}', {$unidades}, '{$imagen}', 0)";
+    /** Query original comentada (SIN column names) */
+    // $sql = "INSERT INTO productos 
+    //         VALUES (NULL, '{$nombre}', '{$marca}', '{$modelo}', {$precio}, '{$detalles}', {$unidades}, '{$imagen}', 0)";
+
+    /** Nueva query CON column names, sin id ni eliminado */
+    $sql = "INSERT INTO productos (nombre, marca, modelo, precio, detalles, unidades, imagen) 
+            VALUES ('{$nombre}', '{$marca}', '{$modelo}', {$precio}, '{$detalles}', {$unidades}, '{$imagen}')";
 
     if ($link->query($sql)) {
         echo '<p style="color:green;">Producto insertado con ID: '.$link->insert_id.'</p>';
@@ -42,15 +46,12 @@ if ($stmt->get_result()->num_rows > 0) {
         echo '<li><strong>Detalles:</strong> ' . htmlspecialchars($detalles) . '</li>';
         echo '<li><strong>Unidades:</strong> ' . htmlspecialchars($unidades) . '</li>';
         echo '<li><strong>Imagen:</strong> <img src="' . htmlspecialchars($imagen) . '" width="150"></li>';
-        echo '<li><strong>Eliminado:</strong> 0 (no eliminado)</li>';
+        echo '<li><strong>Eliminado:</strong> 0 (valor por defecto)</li>';
         echo '</ul>';
     } else {
         echo '<p style="color:red;">El producto no pudo ser insertado: ' . $link->error . '</p>';
     }
 }
-
-$link->close();
-?>
 
 $link->close();
 ?>
