@@ -26,11 +26,11 @@ if ($stmt->get_result()->num_rows > 0) {
 } else {
     $stmt->close();
 
-    /** Insertar nuevo producto */
-    $sql = "INSERT INTO productos (nombre, marca, modelo, precio, detalles, unidades, imagen)
-            VALUES ('{$nombre}', '{$marca}', '{$modelo}', {$precio}, '{$detalles}', {$unidades}, '{$imagen}')";
+    /** Insertar nuevo producto con eliminado = 0 */
+    $sql = "INSERT INTO productos (nombre, marca, modelo, precio, detalles, unidades, imagen, eliminado)
+            VALUES ('{$nombre}', '{$marca}', '{$modelo}', {$precio}, '{$detalles}', {$unidades}, '{$imagen}', 0)";
 
-    // Puedes activar esta línea para ver la consulta SQL generada:
+    // Puedes descomentar esta línea si quieres ver la consulta generada:
     // echo $sql;
 
     if ($link->query($sql)) {
@@ -45,6 +45,7 @@ if ($stmt->get_result()->num_rows > 0) {
         echo '<li><strong>Detalles:</strong> ' . htmlspecialchars($detalles) . '</li>';
         echo '<li><strong>Unidades:</strong> ' . htmlspecialchars($unidades) . '</li>';
         echo '<li><strong>Imagen:</strong> <img src="' . htmlspecialchars($imagen) . '" width="150"></li>';
+        echo '<li><strong>Eliminado:</strong> 0 (no eliminado)</li>';
         echo '</ul>';
     } else {
         echo '<p style="color:red;">El producto no pudo ser insertado: ' . $link->error . '</p>';
