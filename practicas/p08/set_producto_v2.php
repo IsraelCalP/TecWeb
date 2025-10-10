@@ -26,12 +26,9 @@ if ($stmt->get_result()->num_rows > 0) {
 } else {
     $stmt->close();
 
-    /** Insertar nuevo producto con eliminado = 0 */
-    $sql = "INSERT INTO productos (nombre, marca, modelo, precio, detalles, unidades, imagen, eliminado)
-            VALUES ('{$nombre}', '{$marca}', '{$modelo}', {$precio}, '{$detalles}', {$unidades}, '{$imagen}', 0)";
-
-    // Puedes descomentar esta línea si quieres ver la consulta generada:
-    // echo $sql;
+    /** Insertar nuevo producto SIN NOMBRES DE COLUMNAS */
+    $sql = "INSERT INTO productos 
+            VALUES (NULL, '{$nombre}', '{$marca}', '{$modelo}', {$precio}, '{$detalles}', {$unidades}, '{$imagen}', 0)";
 
     if ($link->query($sql)) {
         echo '<p style="color:green;">Producto insertado con ID: '.$link->insert_id.'</p>';
@@ -51,6 +48,9 @@ if ($stmt->get_result()->num_rows > 0) {
         echo '<p style="color:red;">El producto no pudo ser insertado: ' . $link->error . '</p>';
     }
 }
+
+$link->close();
+?>
 
 $link->close();
 ?>
