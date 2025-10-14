@@ -37,6 +37,7 @@
                         <th scope="col">Unidades</th>
                         <th scope="col">Detalles</th>
                         <th scope="col">Imagen</th>
+                        <th scope="col">Modificar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,6 +53,7 @@
                             <td><?= $row['unidades'] ?></td>
                             <td><?= utf8_encode($row['detalles']) ?></td>
                             <td><img src="<?= $row['imagen'] ?>" alt="Imagen del producto" style="max-width: 100px;"></td>
+                            <td><a href="formulario_productos_v2.php?id=<?= $row['id'] ?>" class="btn btn-warning btn-sm">Editar</a></td>
                         </tr>
                     <?php
                     }
