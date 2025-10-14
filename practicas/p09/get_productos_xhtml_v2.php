@@ -6,20 +6,12 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-    <h3>Productos con Unidades Menores o Iguales al Tope Especificado</h3>
+    <h3>Productos</h3>
     <br/>
 
     <?php
-    // Validar que el parámetro 'tope' fue proporcionado
-    if(isset($_GET['tope'])) {
-        $tope = $_GET['tope'];
-    } else {
-        // Si no se proporciona el tope, se muestra un mensaje y se termina el script.
-        die('<div class="alert alert-danger" role="alert">Error: El parámetro "tope" no fue especificado.</div>');
-    }
 
     // Asegurarse de que el tope no esté vacío y sea un número.
-    if (!empty($tope) && is_numeric($tope)) {
         /** SE CREA EL OBJETO DE CONEXION */
         @$link = new mysqli('localhost', 'root', 'Isra2818', 'marketzone');
 
@@ -29,7 +21,7 @@
         }
 
         /** Crear la consulta SQL con el parámetro tope */
-        $sql = "SELECT * FROM productos WHERE unidades <= {$tope}";
+        $sql = "SELECT * FROM productos";
 
         /** Ejecutar la consulta */
         if ($result = $link->query($sql)) {
@@ -84,10 +76,6 @@
         }
         // Cerrar la conexión
         $link->close();
-    } else {
-        // Si el parámetro 'tope' no es válido
-        echo '<div class="alert alert-danger" role="alert">El valor del parámetro "tope" no es válido.</div>';
-    }
     ?>
 </body>
 </html>
