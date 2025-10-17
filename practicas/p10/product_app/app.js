@@ -1,122 +1,124 @@
-// JSON BASE A MOSTRAR EN FORMULARIO
-var baseJSON = {
-    "precio": 0.0,
-    "unidades": 1,
-    "modelo": "XX-000",
-    "marca": "NA",
-    "detalles": "NA",
-    "imagen": "img/default.png"
-  };
-
-// FUNCIÓN CALLBACK DE BOTÓN "Buscar"
-function buscarID(e) {
-    /**
-     * Revisar la siguiente información para entender porqué usar event.preventDefault();
-     * http://qbit.com.mx/blog/2013/01/07/la-diferencia-entre-return-false-preventdefault-y-stoppropagation-en-jquery/#:~:text=PreventDefault()%20se%20utiliza%20para,escuche%20a%20trav%C3%A9s%20del%20DOM
-     * https://www.geeksforgeeks.org/when-to-use-preventdefault-vs-return-false-in-javascript/
-     */
-    e.preventDefault();
-
-    // SE OBTIENE EL ID A BUSCAR
-    var id = document.getElementById('search').value;
-
-    // SE CREA EL OBJETO DE CONEXIÓN ASÍNCRONA AL SERVIDOR
-    var client = getXMLHttpRequest();
-    client.open('POST', './backend/read.php', true);
-    client.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    client.onreadystatechange = function () {
-        // SE VERIFICA SI LA RESPUESTA ESTÁ LISTA Y FUE SATISFACTORIA
-        if (client.readyState == 4 && client.status == 200) {
-            console.log('[CLIENTE]\n'+client.responseText);
-            
-            // SE OBTIENE EL OBJETO DE DATOS A PARTIR DE UN STRING JSON
-            let productos = JSON.parse(client.responseText);    // similar a eval('('+client.responseText+')');
-            
-            // SE VERIFICA SI EL OBJETO JSON TIENE DATOS
-            if(Object.keys(productos).length > 0) {
-                // SE CREA UNA LISTA HTML CON LA DESCRIPCIÓN DEL PRODUCTO
-                let descripcion = '';
-                    descripcion += '<li>precio: '+productos.precio+'</li>';
-                    descripcion += '<li>unidades: '+productos.unidades+'</li>';
-                    descripcion += '<li>modelo: '+productos.modelo+'</li>';
-                    descripcion += '<li>marca: '+productos.marca+'</li>';
-                    descripcion += '<li>detalles: '+productos.detalles+'</li>';
-                
-                // SE CREA UNA PLANTILLA PARA CREAR LA(S) FILA(S) A INSERTAR EN EL DOCUMENTO HTML
-                let template = '';
-                    template += `
-                        <tr>
-                            <td>${productos.id}</td>
-                            <td>${productos.nombre}</td>
-                            <td><ul>${descripcion}</ul></td>
-                        </tr>
-                    `;
-
-                // SE INSERTA LA PLANTILLA EN EL ELEMENTO CON ID "productos"
-                document.getElementById("productos").innerHTML = template;
-            }
-        }
-    };
-    client.send("id="+id);
-}
-
-// FUNCIÓN CALLBACK DE BOTÓN "Agregar Producto"
-function agregarProducto(e) {
-    e.preventDefault();
-
-    // SE OBTIENE DESDE EL FORMULARIO EL JSON A ENVIAR
-    var productoJsonString = document.getElementById('description').value;
-    // SE CONVIERTE EL JSON DE STRING A OBJETO
-    var finalJSON = JSON.parse(productoJsonString);
-    // SE AGREGA AL JSON EL NOMBRE DEL PRODUCTO
-    finalJSON['nombre'] = document.getElementById('name').value;
-    // SE OBTIENE EL STRING DEL JSON FINAL
-    productoJsonString = JSON.stringify(finalJSON,null,2);
-
-    // SE CREA EL OBJETO DE CONEXIÓN ASÍNCRONA AL SERVIDOR
-    var client = getXMLHttpRequest();
-    client.open('POST', './backend/create.php', true);
-    client.setRequestHeader('Content-Type', "application/json;charset=UTF-8");
-    client.onreadystatechange = function () {
-        // SE VERIFICA SI LA RESPUESTA ESTÁ LISTA Y FUE SATISFACTORIA
-        if (client.readyState == 4 && client.status == 200) {
-            console.log(client.responseText);
-        }
-    };
-    client.send(productoJsonString);
-}
-
-// SE CREA EL OBJETO DE CONEXIÓN COMPATIBLE CON EL NAVEGADOR
-function getXMLHttpRequest() {
-    var objetoAjax;
-
-    try{
-        objetoAjax = new XMLHttpRequest();
-    }catch(err1){
-        /**
-         * NOTA: Las siguientes formas de crear el objeto ya son obsoletas
-         *       pero se comparten por motivos historico-académicos.
-         */
-        try{
-            // IE7 y IE8
-            objetoAjax = new ActiveXObject("Msxml2.XMLHTTP");
-        }catch(err2){
-            try{
-                // IE5 y IE6
-                objetoAjax = new ActiveXObject("Microsoft.XMLHTTP");
-            }catch(err3){
-                objetoAjax = false;
-            }
-        }
+/**
+ * Se ejecuta cuando el contenido del DOM está completamente cargado.
+ * Asigna los listeners a los formularios para interceptar sus envíos.
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // Listener para el formulario de búsqueda
+    const searchForm = document.getElementById('search-form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Evita la recarga de la página
+            buscarProducto();
+        });
     }
-    return objetoAjax;
+
+    // Listener para el formulario de agregar producto
+    const productForm = document.getElementById('product-form');
+    if (productForm) {
+        productForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Evita la recarga de la página
+            agregarProducto();
+        });
+    }
+});
+
+/**
+ * Realiza una petición AJAX con GET para buscar productos.
+ * Renderiza los resultados en la tabla.
+ */
+function buscarProducto() {
+    // 1. OBTENER VALOR y usar el ID correcto ('search-input')
+    const searchTerm = document.getElementById('search-input').value.trim();
+
+    // Validar que el campo de búsqueda no esté vacío
+    if (searchTerm === "") {
+        document.getElementById('tabla-resultados').innerHTML = '<tr><td colspan="7">Por favor, escribe algo para buscar.</td></tr>';
+        return;
+    }
+
+    // Usar el objeto XMLHttpRequest nativo
+    const xhr = new XMLHttpRequest();
+
+    // 2. CONFIGURAR LA PETICIÓN CON GET
+    // Los datos se envían directamente en la URL
+    const url = `backend/read.php?search=${encodeURIComponent(searchTerm)}`;
+    xhr.open('GET', url, true);
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                const productos = JSON.parse(xhr.responseText);
+                let template = '';
+                
+                if (productos.length > 0) {
+                    // 3. GENERAR UNA FILA CON CELDAS SEPARADAS (<td>) para cada dato
+                    productos.forEach(producto => {
+                        template += `
+                            <tr productId="${producto.id}">
+                                <td>${producto.id}</td>
+                                <td>${producto.nombre}</td>
+                                <td>${producto.marca}</td>
+                                <td>${producto.modelo}</td>
+                                <td>$${producto.precio}</td>
+                                <td>${producto.detalles}</td>
+                                <td>${producto.unidades}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    template = '<tr><td colspan="7">No se encontraron productos que coincidan.</td></tr>';
+                }
+                
+                // 4. USAR EL ID CORRECTO de la tabla ('tabla-resultados')
+                document.getElementById('tabla-resultados').innerHTML = template;
+
+            } catch (error) {
+                console.error("Error al procesar la respuesta JSON:", error);
+                alert("Ocurrió un error al recibir los datos del servidor.");
+            }
+        }
+    };
+
+    // 5. ENVIAR LA PETICIÓN (sin datos en send() para GET)
+    xhr.send();
 }
 
-function init() {
-    /**
-     * Convierte el JSON a string para poder mostrarlo
-     * ver: https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/JSON
-     */
-    var JsonString = JSON.stringify(baseJSON,null,2);
-    document.getElementById("description").value = JsonString;
+/**
+ * Realiza una petición AJAX con POST para agregar un nuevo producto.
+ * Muestra una alerta con el resultado y actualiza la tabla.
+ */
+function agregarProducto() {
+    // Obtener los valores de los campos del formulario
+    const producto = {
+        nombre: document.getElementById('nombre').value,
+        marca: document.getElementById('marca').value,
+        modelo: document.getElementById('modelo').value,
+        precio: parseFloat(document.getElementById('precio').value),
+        detalles: document.getElementById('detalles').value,
+        unidades: parseInt(document.getElementById('unidades').value)
+    };
+
+    // Validación del lado del cliente
+    if (!producto.nombre || !producto.marca || !producto.modelo || producto.precio <= 0 || producto.unidades < 0) {
+        alert('Por favor, completa los campos obligatorios y asegúrate de que los valores numéricos sean válidos.');
+        return;
+    }
+    
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'backend/create.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            alert(response.message); // Muestra el mensaje del servidor
+
+            if (response.status === 'success') {
+                document.getElementById('product-form').reset(); // Limpia el formulario
+                buscarProducto(); // Actualiza la tabla para mostrar el nuevo producto
+            }
+        }
+    };
+
+    xhr.send(JSON.stringify(producto));
 }
