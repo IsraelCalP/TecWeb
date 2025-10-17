@@ -1,46 +1,38 @@
 /**
- * Se ejecuta cuando el contenido del DOM está completamente cargado.
- * Asigna los listeners a los formularios para interceptar sus envíos.
+ * Se ejecuta cuando el contenido del DOM (la página web) está completamente cargado.
+ * Su función es asignar los "escuchadores de eventos" a los formularios para
+ * interceptar sus envíos y ejecutar nuestras funciones de AJAX en su lugar.
  */
 document.addEventListener('DOMContentLoaded', function() {
-    // Listener para el formulario de búsqueda
+    
+    // Asigna el evento 'submit' al formulario de búsqueda
     const searchForm = document.getElementById('search-form');
     if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Evita la recarga de la página
+        searchForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita que la página se recargue
             buscarProducto();
         });
     }
 
-    // Listener para el formulario de agregar producto
+    // Asigna el evento 'submit' al formulario para agregar productos
     const productForm = document.getElementById('product-form');
     if (productForm) {
-        productForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Evita la recarga de la página
+        productForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita que la página se recargue
             agregarProducto();
         });
     }
 });
 
 /**
- * Realiza una petición AJAX con GET para buscar productos.
- * Renderiza los resultados en la tabla.
+ * Función para buscar productos.
+ * Realiza una petición AJAX con el método GET al script `read.php` y
+ * muestra los resultados en la tabla.
  */
 function buscarProducto() {
-    // 1. OBTENER VALOR y usar el ID correcto ('search-input')
+    // ... (Esta función se mantiene igual que en la respuesta anterior)
     const searchTerm = document.getElementById('search-input').value.trim();
-
-    // Validar que el campo de búsqueda no esté vacío
-    if (searchTerm === "") {
-        document.getElementById('tabla-resultados').innerHTML = '<tr><td colspan="7">Por favor, escribe algo para buscar.</td></tr>';
-        return;
-    }
-
-    // Usar el objeto XMLHttpRequest nativo
     const xhr = new XMLHttpRequest();
-
-    // 2. CONFIGURAR LA PETICIÓN CON GET
-    // Los datos se envían directamente en la URL
     const url = `backend/read.php?search=${encodeURIComponent(searchTerm)}`;
     xhr.open('GET', url, true);
 
@@ -51,7 +43,6 @@ function buscarProducto() {
                 let template = '';
                 
                 if (productos.length > 0) {
-                    // 3. GENERAR UNA FILA CON CELDAS SEPARADAS (<td>) para cada dato
                     productos.forEach(producto => {
                         template += `
                             <tr productId="${producto.id}">
@@ -66,44 +57,81 @@ function buscarProducto() {
                         `;
                     });
                 } else {
-                    template = '<tr><td colspan="7">No se encontraron productos que coincidan.</td></tr>';
+                    template = '<tr><td colspan="7">No se encontraron productos.</td></tr>';
                 }
-                
-                // 4. USAR EL ID CORRECTO de la tabla ('tabla-resultados')
                 document.getElementById('tabla-resultados').innerHTML = template;
-
             } catch (error) {
                 console.error("Error al procesar la respuesta JSON:", error);
                 alert("Ocurrió un error al recibir los datos del servidor.");
             }
         }
     };
-
-    // 5. ENVIAR LA PETICIÓN (sin datos en send() para GET)
     xhr.send();
 }
 
 /**
- * Realiza una petición AJAX con POST para agregar un nuevo producto.
- * Muestra una alerta con el resultado y actualiza la tabla.
+ * Función para agregar un nuevo producto.
+ * Realiza una validación DETALLADA de los datos, los empaqueta en JSON y los envía
+ * con el método POST al script `create.php`.
  */
 function agregarProducto() {
-    // Obtener los valores de los campos del formulario
-    const producto = {
-        nombre: document.getElementById('nombre').value,
-        marca: document.getElementById('marca').value,
-        modelo: document.getElementById('modelo').value,
-        precio: parseFloat(document.getElementById('precio').value),
-        detalles: document.getElementById('detalles').value,
-        unidades: parseInt(document.getElementById('unidades').value)
-    };
+    console.log("El botón de agregar fue presionado. Iniciando validaciones...");
+    
 
-    // Validación del lado del cliente
-    if (!producto.nombre || !producto.marca || !producto.modelo || producto.precio <= 0 || producto.unidades < 0) {
-        alert('Por favor, completa los campos obligatorios y asegúrate de que los valores numéricos sean válidos.');
-        return;
+    // 1. Recolecta los datos del formulario
+    const nombre = document.getElementById('nombre').value.trim();
+    const marca = document.getElementById('marca').value.trim();
+    const modelo = document.getElementById('modelo').value.trim();
+    const precio = document.getElementById('precio').value.trim();
+    const detalles = document.getElementById('detalles').value.trim();
+    const unidades = document.getElementById('unidades').value.trim();
+
+    // 2. APLICA TUS VALIDACIONES ESPECÍFICAS
+    if (nombre === "" || nombre.length > 100) {
+        alert("Error en Nombre: El nombre es obligatorio y debe tener 100 caracteres o menos.");
+        return; // Detiene la función
     }
     
+    if (marca === "") {
+        alert("Error en Marca: La marca es obligatoria.");
+        return;
+    }
+
+    // Suponiendo que 'modelo' debe ser alfanumérico
+    const modeloRegex = /^[a-zA-Z0-9\s-]+$/;
+    if (modelo === "" || modelo.length > 25 || !modeloRegex.test(modelo)) {
+        alert("Error en Modelo: El modelo es obligatorio, alfanumérico y de 25 caracteres o menos.");
+        return;
+    }
+
+    const precioVal = parseFloat(precio);
+    if (isNaN(precioVal) || precioVal <= 99.99) {
+        alert("Error en Precio: El precio es obligatorio y debe ser un número mayor a 99.99.");
+        return;
+    }
+
+    const unidadesVal = parseInt(unidades, 10);
+    if (isNaN(unidadesVal) || unidadesVal < 0) {
+        alert("Error en Unidades: Las unidades son obligatorias y deben ser 0 o un número mayor.");
+        return;
+    }
+
+    if (detalles.length > 250) {
+        alert("Error en Detalles: Los detalles no deben tener más de 250 caracteres.");
+        return;
+    }
+
+    // 3. Si todas las validaciones pasan, crea el objeto de producto
+    const producto = {
+        nombre: nombre,
+        marca: marca,
+        modelo: modelo,
+        precio: precioVal,
+        detalles: detalles,
+        unidades: unidadesVal
+    };
+    
+    // 4. Configura y envía la petición AJAX
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'backend/create.php', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -111,14 +139,15 @@ function agregarProducto() {
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
             const response = JSON.parse(xhr.responseText);
-            alert(response.message); // Muestra el mensaje del servidor
+            alert(response.message);
 
             if (response.status === 'success') {
-                document.getElementById('product-form').reset(); // Limpia el formulario
-                buscarProducto(); // Actualiza la tabla para mostrar el nuevo producto
+                document.getElementById('product-form').reset();
+                buscarProducto(); 
             }
         }
     };
 
+    // 5. Convierte el objeto a JSON y lo envía
     xhr.send(JSON.stringify(producto));
 }

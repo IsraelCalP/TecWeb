@@ -15,7 +15,7 @@ if (!$conexion) {
 
 $data = array();
 
-// 1. VERIFICAR HABER RECIBIDO UN DATO POR GET (más estándar para búsquedas)
+// 1. VERIFICAR HABER RECIBIDO UN DATO POR GET 
 if (isset($_GET['search'])) {
     
     // 2. PREPARAR LA CONSULTA PARA MÁXIMA SEGURIDAD
