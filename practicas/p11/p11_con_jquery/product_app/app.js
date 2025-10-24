@@ -29,9 +29,7 @@ $(document).ready(function() {
     // --- MANEJADORES DE EVENTOS JQUERY ---
 
     /**
-     * (ii) Cargar la TABLA con productos que coincidan al teclear.
-     * (iii) Requisito (iii) de la barra de estado se elimina de la búsqueda 
-     * para evitar confusión.
+     * (ii) y (iii) Cargar tabla y barra de estado al "teclear" en búsqueda.
      */
     $('#search').keyup(function() {
         let search = $(this).val();
@@ -44,11 +42,17 @@ $(document).ready(function() {
                 data: { search: search }, // jQuery formatea la URL (product-search.php?search=valor)
                 success: function(response) {
                     let productos = JSON.parse(response);
-                    let template = '';
+                    
+                    let template = ''; // (ii) Plantilla para la TABLA
+                    let template_bar = ''; // (iii) Plantilla para la BARRA DE ESTADO
 
                     if(Object.keys(productos).length > 0) {
                         productos.forEach(producto => {
-                            // (ii) Cargar productos completos en la tabla
+                            
+                            // (iii) Cargar en la barra de estado los NOMBRES
+                            template_bar += `<li>${producto.nombre}</li>`;
+
+                            // (ii) Cargar la TABLA con la descripción completa
                             let descripcion = '';
                             descripcion += '<li>precio: '+producto.precio+'</li>';
                             descripcion += '<li>unidades: '+producto.unidades+'</li>';
@@ -69,35 +73,58 @@ $(document).ready(function() {
                                 </tr>
                             `;
                         });
+                        
+                        // (iii) Mostrar barra de estado y actualizar su contenido
+                        $('#product-result').removeClass('d-none').addClass('d-block');
+                        $('#container').html(template_bar);
+
                     } else {
-                         template = `<tr><td colspan="4">No se encontraron productos.</td></tr>`;
+                        // Si no hay resultados
+                        template = `<tr><td colspan="4">No se encontraron productos.</td></tr>`;
+                        // Ocultar la barra de estado
+                        $('#product-result').removeClass('d-block').addClass('d-none');
                     }
                     
-                    // **MODIFICACIÓN:**
-                    // Ya no se muestra la barra de estado (#product-result)
-                    // Solo se actualiza la tabla principal (#products)
+                    // (ii) Actualizar siempre la tabla
                     $('#products').html(template);
                 }
             });
         } else {
-            // Si la búsqueda está vacía, oculta la barra (por si acaso) y muestra todos los productos
+            // Si la búsqueda está vacía, oculta la barra y muestra todos los productos
             $('#product-result').removeClass('d-block').addClass('d-none');
             listarProductos();
         }
     });
 
     /**
-     * (iv) y (v) Registrar un producto.
-     * Se usa el evento 'submit' del formulario.
+     * (iv) y (v) Registrar un producto (CON VALIDACIÓN).
      */
     $('#product-form').submit(function(e) {
         // Previene el comportamiento por defecto del formulario (recargar la página)
         e.preventDefault();
 
-        // Se obtienen los datos del formulario
+        // --- VALIDACIÓN AÑADIDA ---
+        let nombreProducto = $('#name').val(); // Obtengo el nombre primero
+
+        // Se usa .trim() para eliminar espacios en blanco al inicio o final
+        if (nombreProducto.trim() === '') {
+            // Si el nombre está vacío (o solo tiene espacios)
+            
+            // 1. Mostrar mensaje de error en la barra de estado
+            let template_bar = `<li style="list-style: none; color: yellow;">Error: El nombre del producto no puede estar vacío.</li>`;
+            $('#product-result').removeClass('d-none').addClass('d-block');
+            $('#container').html(template_bar);
+            
+            // 2. Detener la ejecución (NO se enviará el AJAX)
+            return; 
+        }
+        // --- FIN VALIDACIÓN ---
+
+
+        // Si la validación pasa, se continúa con el proceso
         var productoJsonString = $('#description').val();
         var finalJSON = JSON.parse(productoJsonString);
-        finalJSON['nombre'] = $('#name').val();
+        finalJSON['nombre'] = nombreProducto; // Usa la variable que ya validamos
         productoJsonString = JSON.stringify(finalJSON, null, 2);
 
         // Se envía el producto usando $.ajax (POST)
@@ -130,8 +157,6 @@ $(document).ready(function() {
 
     /**
      * (vi) Eliminar un producto.
-     * Se usa delegación de eventos (.on 'click') porque los botones
-     * de eliminar se crean dinámicamente.
      */
     $(document).on('click', '.product-delete', function() {
         if( confirm("De verdad deseas eliminar el Producto") ) {
