@@ -7,7 +7,11 @@
     if( isset($_GET['search']) ) {
         $search = $_GET['search'];
         // SE REALIZA LA QUERY DE BÚSQUEDA Y AL MISMO TIEMPO SE VALIDA SI HUBO RESULTADOS
-        $sql = "SELECT * FROM productos WHERE (id = '{$search}' OR nombre LIKE '%{$search}%' OR marca LIKE '%{$search}%' OR detalles LIKE '%{$search}%') AND eliminado = 0";
+        
+        // MODIFICACIÓN: La consulta ahora busca SÓLO en la columna 'nombre'
+        // y busca coincidencias que EMPIECEN con el término de búsqueda.
+        $sql = "SELECT * FROM productos WHERE nombre LIKE '{$search}%' AND eliminado = 0";
+
         if ( $result = $conexion->query($sql) ) {
             // SE OBTIENEN LOS RESULTADOS
 			$rows = $result->fetch_all(MYSQLI_ASSOC);
