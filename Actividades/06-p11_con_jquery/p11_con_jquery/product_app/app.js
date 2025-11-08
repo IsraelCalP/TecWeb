@@ -3,10 +3,6 @@ $(document).ready(function(){
     let edit = false;
     let originalName = '';
 
-    // (Task 5) El JSON base ya no es necesario
-    // let JsonString = JSON.stringify(baseJSON,null,2); (ELIMINADO)
-    // $('#description').val(JsonString); (ELIMINADO)
-    
     $('#product-result').hide();
     listarProductos();
 
@@ -182,7 +178,11 @@ $(document).ready(function(){
             let $field = $(fieldId);
             if ($field.val().trim() === '') {
                 let fieldName = $field.attr('placeholder');
-                showStatus(`Error: El campo "${fieldName}" es obligatorio para guardar.`, true);
+                
+                // << --- MODIFICACIÓN: Se usa alert() --- >>
+                alert(`Error: El campo "${fieldName}" es obligatorio para guardar.`);
+                // << ------------------------------------ >>
+
                 isValid = false;
                 break; // Detener en el primer error
             }
