@@ -155,6 +155,9 @@ $(document).ready(function(){
             listarProductos();
             // SE REGRESA LA BANDERA DE EDICIÓN A false
             edit = false;
+
+            // ===== CÓDIGO AÑADIDO PARA RESETEAR EL BOTÓN =====
+            $('button.btn-primary').text("Agregar Producto");
         });
     });
 
@@ -190,6 +193,9 @@ $(document).ready(function(){
             
             // SE PONE LA BANDERA DE EDICIÓN EN true
             edit = true;
+
+            // ===== CÓDIGO SOLICITADO AÑADIDO =====
+            $('button.btn-primary').text("Modificar Producto");
         });
         e.preventDefault();
     });    
