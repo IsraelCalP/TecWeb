@@ -1,36 +1,100 @@
-// JSON BASE A MOSTRAR EN FORMULARIO
-var baseJSON = {
-    "precio": 0.0,
-    "unidades": 1,
-    "modelo": "XX-000",
-    "marca": "NA",
-    "detalles": "NA",
-    "imagen": "img/default.png"
-  };
-
 $(document).ready(function(){
+    // Bandera para modo edición y para guardar el nombre original (Task 7)
     let edit = false;
+    let originalName = '';
 
-    let JsonString = JSON.stringify(baseJSON,null,2);
-    $('#description').val(JsonString);
+    // (Task 5) El JSON base ya no es necesario
+    // let JsonString = JSON.stringify(baseJSON,null,2); (ELIMINADO)
+    // $('#description').val(JsonString); (ELIMINADO)
+    
     $('#product-result').hide();
     listarProductos();
+
+    // --- Tarea 6: Funciones de Status ---
+    /**
+     * Muestra un mensaje en la barra de estado.
+     * @param {string} message - El mensaje a mostrar.
+     * @param {boolean} isError - Si es true, muestra el mensaje en rojo.
+     */
+    function showStatus(message, isError = false) {
+        let color = isError ? '#F57373' : '#73F583'; // Rojo para error, Verde para éxito
+        let template_bar = `<li style="list-style: none; color: ${color};">${message}</li>`;
+        $('#product-result').show();
+        $('#container').html(template_bar);
+    }
+
+    /**
+     * Oculta la barra de estado.
+     */
+    function hideStatus() {
+        $('#product-result').hide();
+        $('#container').html('');
+    }
+
+    // --- Tarea 5.1: Validación "on-blur" (al perder el foco) ---
+    // Se valida que los campos no estén vacíos.
+    $('#precio, #unidades, #modelo, #marca, #detalles, #imagen').blur(function() {
+        if ($(this).val().trim() === '') {
+            let fieldName = $(this).attr('placeholder');
+            showStatus(`El campo "${fieldName}" no puede estar vacío.`, true);
+        } else {
+            let fieldName = $(this).attr('placeholder');
+            showStatus(`Campo "${fieldName}" validado.`, false);
+        }
+    });
+
+    // --- Tarea 7: Validación asíncrona de nombre de producto ---
+    $('#name').keyup(function() {
+        let nombre = $(this).val().trim();
+        
+        // Validamos si está vacío (como en Task 5.1)
+        if (nombre === '') {
+            showStatus('El campo "Nombre de producto" no puede estar vacío.', true);
+            return;
+        }
+
+        // Si estamos editando y el nombre es el original, no hacemos nada
+        if (edit && nombre.toLowerCase() === originalName.toLowerCase()) {
+            hideStatus();
+            return;
+        }
+
+        // Hacemos la petición AJAX para buscar coincidencias
+        $.ajax({
+            url: './backend/product-search.php?search=' + nombre,
+            type: 'GET',
+            success: function (response) {
+                const productos = JSON.parse(response);
+                let nameExists = false;
+                
+                // Revisamos si algún producto devuelto TIENE EL NOMBRE EXACTO
+                if(Object.keys(productos).length > 0) {
+                    productos.forEach(producto => {
+                        if (producto.nombre.toLowerCase() === nombre.toLowerCase()) {
+                            nameExists = true;
+                        }
+                    });
+                }
+
+                if (nameExists) {
+                    showStatus('Error: Ese nombre de producto ya existe en la BD.', true);
+                } else {
+                    showStatus('Nombre de producto disponible.', false);
+                }
+            }
+        });
+    });
+
 
     function listarProductos() {
         $.ajax({
             url: './backend/product-list.php',
             type: 'GET',
             success: function(response) {
-                // SE OBTIENE EL OBJETO DE DATOS A PARTIR DE UN STRING JSON
                 const productos = JSON.parse(response);
-            
-                // SE VERIFICA SI EL OBJETO JSON TIENE DATOS
                 if(Object.keys(productos).length > 0) {
-                    // SE CREA UNA PLANTILLA PARA CREAR LAS FILAS A INSERTAR EN EL DOCUMENTO HTML
                     let template = '';
-
                     productos.forEach(producto => {
-                        // SE CREA UNA LISTA HTML CON LA DESCRIPCIÓN DEL PRODUCTO
                         let descripcion = '';
                         descripcion += '<li>precio: '+producto.precio+'</li>';
                         descripcion += '<li>unidades: '+producto.unidades+'</li>';
@@ -51,7 +115,6 @@ $(document).ready(function(){
                             </tr>
                         `;
                     });
-                    // SE INSERTA LA PLANTILLA EN EL ELEMENTO CON ID "productos"
                     $('#products').html(template);
                 }
             }
@@ -67,17 +130,11 @@ $(document).ready(function(){
                 type: 'GET',
                 success: function (response) {
                     if(!response.error) {
-                        // SE OBTIENE EL OBJETO DE DATOS A PARTIR DE UN STRING JSON
                         const productos = JSON.parse(response);
-                        
-                        // SE VERIFICA SI EL OBJETO JSON TIENE DATOS
                         if(Object.keys(productos).length > 0) {
-                            // SE CREA UNA PLANTILLA PARA CREAR LAS FILAS A INSERTAR EN EL DOCUMENTO HTML
                             let template = '';
                             let template_bar = '';
-
                             productos.forEach(producto => {
-                                // SE CREA UNA LISTA HTML CON LA DESCRIPCIÓN DEL PRODUCTO
                                 let descripcion = '';
                                 descripcion += '<li>precio: '+producto.precio+'</li>';
                                 descripcion += '<li>unidades: '+producto.unidades+'</li>';
@@ -97,16 +154,12 @@ $(document).ready(function(){
                                         </td>
                                     </tr>
                                 `;
-
                                 template_bar += `
                                     <li>${producto.nombre}</il>
                                 `;
                             });
-                            // SE HACE VISIBLE LA BARRA DE ESTADO
                             $('#product-result').show();
-                            // SE INSERTA LA PLANTILLA PARA LA BARRA DE ESTADO
                             $('#container').html(template_bar);
-                            // SE INSERTA LA PLANTILLA EN EL ELEMENTO CON ID "productos"
                             $('#products').html(template);    
                         }
                     }
@@ -121,43 +174,58 @@ $(document).ready(function(){
     $('#product-form').submit(e => {
         e.preventDefault();
 
-        // SE CONVIERTE EL JSON DE STRING A OBJETO
-        let postData = JSON.parse( $('#description').val() );
-        // SE AGREGA AL JSON EL NOMBRE DEL PRODUCTO
-        postData['nombre'] = $('#name').val();
-        postData['id'] = $('#productId').val();
+        // --- Tarea 5.2: Validar campos requeridos antes de enviar ---
+        let isValid = true;
+        let fieldsToValidate = ['#name', '#precio', '#unidades', '#modelo', '#marca', '#detalles', '#imagen'];
+        
+        for (const fieldId of fieldsToValidate) {
+            let $field = $(fieldId);
+            if ($field.val().trim() === '') {
+                let fieldName = $field.attr('placeholder');
+                showStatus(`Error: El campo "${fieldName}" es obligatorio para guardar.`, true);
+                isValid = false;
+                break; // Detener en el primer error
+            }
+        }
 
-        /**
-         * AQUÍ DEBES AGREGAR LAS VALIDACIONES DE LOS DATOS EN EL JSON
-         * --> EN CASO DE NO HABER ERRORES, SE ENVIAR EL PRODUCTO A AGREGAR
-         **/
+        if (!isValid) {
+            return; // Detiene el envío del formulario
+        }
+        // --- Fin Tarea 5.2 ---
+
+        // (Task 5) Se obtienen los datos de los nuevos campos
+        const postData = {
+            nombre: $('#name').val(),
+            precio: $('#precio').val(),
+            unidades: $('#unidades').val(),
+            modelo: $('#modelo').val(),
+            marca: $('#marca').val(),
+            detalles: $('#detalles').val(),
+            imagen: $('#imagen').val(),
+            id: $('#productId').val()
+        };
 
         const url = edit === false ? './backend/product-add.php' : './backend/product-edit.php';
         
         $.post(url, postData, (response) => {
-            //console.log(response);
-            // SE OBTIENE EL OBJETO DE DATOS A PARTIR DE UN STRING JSON
             let respuesta = JSON.parse(response);
-            // SE CREA UNA PLANTILLA PARA CREAR INFORMACIÓN DE LA BARRA DE ESTADO
-            let template_bar = '';
-            template_bar += `
-                        <li style="list-style: none;">status: ${respuesta.status}</li>
-                        <li style="list-style: none;">message: ${respuesta.message}</li>
-                    `;
-            // SE REINICIA EL FORMULARIO
-            $('#name').val('');
-            $('#description').val(JsonString);
-            // SE HACE VISIBLE LA BARRA DE ESTADO
-            $('#product-result').show();
-            // SE INSERTA LA PLANTILLA PARA LA BARRA DE ESTADO
-            $('#container').html(template_bar);
-            // SE LISTAN TODOS LOS PRODUCTOS
-            listarProductos();
-            // SE REGRESA LA BANDERA DE EDICIÓN A false
-            edit = false;
+            
+            // (Task 6) Se usa la función de status para mostrar la respuesta del servidor
+            let isError = (respuesta.status !== 'success');
+            showStatus(respuesta.message, isError);
 
-            // ===== CÓDIGO AÑADIDO (PREGUNTA 3) =====
-            $('button.btn-primary').text("Agregar Producto");
+            // Solo reiniciamos si fue exitoso
+            if (!isError) {
+                // (Task 5) Se reinician los nuevos campos del formulario
+                $('#product-form').trigger('reset'); // Resetea todos los campos
+                $('#productId').val(''); // Asegura limpiar el ID oculto
+
+                listarProductos();
+                
+                edit = false;
+                originalName = ''; // Limpia el nombre original
+                $('button.btn-primary').text("Agregar Producto");
+            }
         });
     });
 
@@ -176,26 +244,25 @@ $(document).ready(function(){
         const element = $(this)[0].activeElement.parentElement.parentElement;
         const id = $(element).attr('productId');
         $.post('./backend/product-single.php', {id}, (response) => {
-            // SE CONVIERTE A OBJETO EL JSON OBTENIDO
             let product = JSON.parse(response);
-            // SE INSERTAN LOS DATOS ESPECIALES EN LOS CAMPOS CORRESPONDIENTES
-            $('#name').val(product.nombre);
-            // EL ID SE INSERTA EN UN CAMPO OCULTO PARA USARLO DESPUÉS PARA LA ACTUALIZACIÓN
-            $('#productId').val(product.id);
-            // SE ELIMINA nombre, eliminado E id PARA PODER MOSTRAR EL JSON EN EL <textarea>
-            delete(product.nombre);
-            delete(product.eliminado);
-            delete(product.id);
-            // SE CONVIERTE EL OBJETO JSON EN STRING
-            let JsonString = JSON.stringify(product,null,2);
-            // SE MUESTRA STRING EN EL <textarea>
-            $('#description').val(JsonString);
             
-            // SE PONE LA BANDERA DE EDICIÓN EN true
+            // (Task 5) Se insertan los datos en los nuevos campos
+            $('#name').val(product.nombre);
+            $('#precio').val(product.precio);
+            $('#unidades').val(product.unidades);
+            $('#modelo').val(product.modelo);
+            $('#marca').val(product.marca);
+            $('#detalles').val(product.detalles);
+            $('#imagen').val(product.imagen);
+            $('#productId').val(product.id);
+            
+            // (Task 7) Guardamos el nombre original para la validación
+            originalName = product.nombre;
             edit = true;
-
-            // ===== CÓDIGO AÑADIDO (PREGUNTA 2) =====
             $('button.btn-primary').text("Modificar Producto");
+
+            // (Task 6) Ocultamos cualquier mensaje de estado previo
+            hideStatus();
         });
         e.preventDefault();
     });    
