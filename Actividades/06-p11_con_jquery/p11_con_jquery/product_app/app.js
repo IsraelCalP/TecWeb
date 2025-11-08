@@ -156,7 +156,7 @@ $(document).ready(function(){
             // SE REGRESA LA BANDERA DE EDICIÓN A false
             edit = false;
 
-            // ===== CÓDIGO AÑADIDO PARA RESETEAR EL BOTÓN =====
+            // ===== CÓDIGO AÑADIDO (PREGUNTA 3) =====
             $('button.btn-primary').text("Agregar Producto");
         });
     });
@@ -194,7 +194,7 @@ $(document).ready(function(){
             // SE PONE LA BANDERA DE EDICIÓN EN true
             edit = true;
 
-            // ===== CÓDIGO SOLICITADO AÑADIDO =====
+            // ===== CÓDIGO AÑADIDO (PREGUNTA 2) =====
             $('button.btn-primary').text("Modificar Producto");
         });
         e.preventDefault();
