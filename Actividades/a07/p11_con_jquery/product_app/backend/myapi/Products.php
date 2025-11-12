@@ -56,7 +56,7 @@ class Products extends DataBase {
                 $this->data['status'] = "success";
                 $this->data['message'] = "Producto agregado";
             } else {
-                $this->data['error'] = "ERROR: " . $stmt_insert->error;
+                $this->data = ['status' => 'error', 'message' => 'ERROR: ' . $stmt_insert->error];
             }
             $stmt_insert->close();
         } else {
@@ -78,7 +78,7 @@ class Products extends DataBase {
                 $this->data['status'] = "success";
                 $this->data['message'] = "Producto eliminado";
             } else {
-                $this->data['error'] = "ERROR: " . $stmt->error;
+                $this->data = ['status' => 'error', 'message' => 'ERROR: ' . $stmt->error];
             }
             $stmt->close();
         }
@@ -106,7 +106,7 @@ class Products extends DataBase {
                 $this->data['status'] = "success";
                 $this->data['message'] = "Producto actualizado";
             } else {
-                $this->data['error'] = "ERROR: " . $stmt->error;
+                $this->data = ['status' => 'error', 'message' => 'ERROR: ' . $stmt->error];
             }
             $stmt->close();
         }
