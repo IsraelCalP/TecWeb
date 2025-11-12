@@ -1,7 +1,9 @@
 <?php
-    include_once __DIR__.'/database.php';
+    use TECWEB\MYAPI\Products;
+    require_once __DIR__ . '/myapi/Products.php';
+header('Content-Type: application/json');
 
-    // SE CREA EL ARREGLO QUE SE VA A DEVOLVER EN FORMA DE JSON
+    /*// SE CREA EL ARREGLO QUE SE VA A DEVOLVER EN FORMA DE JSON
     $data = array(
         'status'  => 'error',
         'message' => 'La consulta falló'
@@ -24,5 +26,20 @@
     } 
     
     // SE HACE LA CONVERSIÓN DE ARRAY A JSON
-    echo json_encode($data, JSON_PRETTY_PRINT);
+    echo json_encode($data, JSON_PRETTY_PRINT); */
+
+    try {
+    // 3. Crear instancia
+    $productos = new Products("marketzone", "root", "Isra2818");
+
+    // 4. Invocar al método edit() pasándole los datos del POST
+    $productos->edit($_POST);
+
+    // 5. Devolver respuesta JSON
+    echo $productos->getData();
+
+} catch (Exception $e) {
+    echo json_encode(['error' => $e->getMessage()]);
+}
+?>
 ?>
