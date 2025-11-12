@@ -8,7 +8,7 @@ require_once __DIR__ . '/DataBase.php';
 class Products extends DataBase {
     private $data = [];
 
-    public function __construct($db, $user = 'root', $pass = '') {
+    public function __construct($db = 'marketzone', $user = 'root', $pass = 'Isra2818') {
         $this->data = array();
         // Llamada al constructor padre con el orden correcto (user, pass, db)
         parent::__construct($user, $pass, $db);

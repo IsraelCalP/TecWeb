@@ -20,11 +20,5 @@ abstract class DataBase {
         $this->conexion->set_charset('utf8');
     }
 
-    // Destructor para cerrar la conexión automáticamente al final del script
-    public function __destruct() {
-        if ($this->conexion) {
-            $this->conexion->close();
-        }
-    }
 }
 ?>
