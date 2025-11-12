@@ -5,15 +5,26 @@ abstract class DataBase {
     protected $conexion;
 
     public function __construct($user, $pass, $db) {
+        $host = 'localhost'; // Host es usualmente localhost
         $this->conexion = @mysqli_connect(
-            'localhost',
+            $host,
             $user, 
             $pass, 
             $db
         );
 
         if (!$this->conexion) {
-            die('Base de datos NO encontrada');
+            die('Base de datos NO encontrada: ' . mysqli_connect_error());
+        }
+
+        //la conexión trabaje en UTF-8
+        $this->conexion->set_charset('utf8');
+    }
+
+    // Destructor para cerrar la conexión automáticamente al final del script
+    public function __destruct() {
+        if ($this->conexion) {
+            $this->conexion->close();
         }
     }
 }

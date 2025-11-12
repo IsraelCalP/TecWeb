@@ -6,193 +6,194 @@ use TECWEB\MYAPI\DataBase as DataBase;
 require_once __DIR__ . '/DataBase.php';
 
 class Products extends DataBase {
-    private $data = NULL;
+    private $data = [];
+
     public function __construct($db, $user = 'root', $pass = '') {
         $this->data = array();
+        // Llamada al constructor padre con el orden correcto (user, pass, db)
         parent::__construct($user, $pass, $db);
     }
 
+    // +list(): void
     public function list() {
-        // SE CREA EL ARREGLO QUE SE VA A DEVOLVER EN FORMA DE JSON
-        $this->data = array();
-        // SE REALIZA LA QUERY DE BÚSQUEDA Y AL MISMO TIEMPO SE VALIDA SI HUBO RESULTADOS
-        if ( $result = $this->conexion->query("SELECT * FROM productos WHERE eliminado = 0") ) {
-            // SE OBTIENEN LOS RESULTADOS
-            $rows = $result->fetch_all(MYSQLI_ASSOC);
-            if(!is_null($rows)) {
-                // SE CODIFICAN A UTF-8 LOS DATOS Y SE MAPEAN AL ARREGLO DE RESPUESTA
-                foreach($rows as $num => $row) {
-                    foreach($row as $key => $value) {
-                        $this->data[$num][$key] = $value;
-                    }
-                }
-            }
+        $this->data = [];
+        $sql = "SELECT * FROM productos WHERE eliminado = 0";
+        if ($result = $this->conexion->query($sql)) {
+            $this->data = $result->fetch_all(MYSQLI_ASSOC); // Más simple
             $result->free();
         } else {
-            die('Query Error: '.mysqli_error($this->conexion));
+            $this->data = ['error' => 'Query Error: ' . $this->conexion->error];
         }
-        $this->conexion->close();
+      
     }
 
+    // +add(Object): void
     public function add($postData) {
-        if (isset($postData['nombre'])) {
-            $jsonOBJ = json_decode(json_encode($postData));
+        // Asignación segura de variables
+        $nombre = $postData['nombre'] ?? '';
+        $marca = $postData['marca'] ?? '';
+        $modelo = $postData['modelo'] ?? '';
+        $precio = $postData['precio'] ?? 0.0;
+        $detalles = $postData['detalles'] ?? '';
+        $unidades = $postData['unidades'] ?? 0;
+        $imagen = $postData['imagen'] ?? '';
 
-            $sql = "SELECT * FROM productos WHERE nombre = '{$jsonOBJ->nombre}' AND eliminado = 0";
-            $result = $this->conexion->query($sql);
+        // 1. Revisar si el nombre ya existe
+        $stmt_check = $this->conexion->prepare("SELECT * FROM productos WHERE nombre = ? AND eliminado = 0");
+        $stmt_check->bind_param("s", $nombre);
+        $stmt_check->execute();
+        $result_check = $stmt_check->get_result();
 
-            if ($result->num_rows == 0) {
-                $this->conexion->set_charset("utf8");
-                $sql = "INSERT INTO productos VALUES (
-                    null,
-                    '{$jsonOBJ->nombre}',
-                    '{$jsonOBJ->marca}',
-                    '{$jsonOBJ->modelo}',
-                    {$jsonOBJ->precio},
-                    '{$jsonOBJ->detalles}',
-                    {$jsonOBJ->unidades},
-                    '{$jsonOBJ->imagen}',
-                    0
-                )";
-
-                if ($this->conexion->query($sql)) {
-                    $this->data['status'] = "success";
-                    $this->data['message'] = "Producto agregado";
-                } else {
-                    $this->data['message'] = "ERROR: No se ejecutó $sql. " . $this->conexion->error;
-                }
+        if ($result_check->num_rows == 0) {
+            // 2. Insertar si no existe
+            $sql = "INSERT INTO productos (nombre, marca, modelo, precio, detalles, unidades, imagen, eliminado) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
+            $stmt_insert = $this->conexion->prepare($sql);
+            // s = string, d = double, i = integer
+            $stmt_insert->bind_param("sssdsis", $nombre, $marca, $modelo, $precio, $detalles, $unidades, $imagen);
+            
+            if ($stmt_insert->execute()) {
+                $this->data['status'] = "success";
+                $this->data['message'] = "Producto agregado";
+            } else {
+                $this->data['error'] = "ERROR: " . $stmt_insert->error;
             }
-
-            $result->free();
-            $this->conexion->close();
+            $stmt_insert->close();
+        } else {
+            $this->data['status'] = "error";
+            $this->data['message'] = "Ya existe un producto con ese nombre";
         }
+        $stmt_check->close();
     }
 
+    // +delete(string): void
     public function delete($postData) {
-        if (isset($postData['id'])) {
-            $id = intval($postData['id']);
-            $sql = "UPDATE productos SET eliminado = 1 WHERE id = {$id}";
-
-            if ($this->conexion->query($sql)) {
+        $id = $postData['id'] ?? 0;
+        if ($id > 0) {
+            $sql = "UPDATE productos SET eliminado = 1 WHERE id = ?";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param("i", $id);
+            
+            if ($stmt->execute()) {
                 $this->data['status'] = "success";
                 $this->data['message'] = "Producto eliminado";
             } else {
-                $this->data['message'] = "ERROR: No se ejecutó $sql. " . $this->conexion->error;
+                $this->data['error'] = "ERROR: " . $stmt->error;
             }
-
-            $this->conexion->close();
+            $stmt->close();
         }
     }
 
+    // +edit(Object): void
     public function edit($postData) {
-        if (isset($postData['id'])) {
-            $jsonOBJ = json_decode(json_encode($postData));
+        $id = $postData['id'] ?? 0;
+        $nombre = $postData['nombre'] ?? '';
+        $marca = $postData['marca'] ?? '';
+        $modelo = $postData['modelo'] ?? '';
+        $precio = $postData['precio'] ?? 0.0;
+        $detalles = $postData['detalles'] ?? '';
+        $unidades = $postData['unidades'] ?? 0;
+        $imagen = $postData['imagen'] ?? '';
 
-            $sql  = "UPDATE productos SET ";
-            $sql .= "nombre='{$jsonOBJ->nombre}', ";
-            $sql .= "marca='{$jsonOBJ->marca}', ";
-            $sql .= "modelo='{$jsonOBJ->modelo}', ";
-            $sql .= "precio={$jsonOBJ->precio}, ";
-            $sql .= "detalles='{$jsonOBJ->detalles}', ";
-            $sql .= "unidades={$jsonOBJ->unidades}, ";
-            $sql .= "imagen='{$jsonOBJ->imagen}' ";
-            $sql .= "WHERE id={$jsonOBJ->id}";
+        if ($id > 0) {
+            $sql = "UPDATE productos SET nombre=?, marca=?, modelo=?, precio=?, detalles=?, unidades=?, imagen=? 
+                    WHERE id = ?";
+            $stmt = $this->conexion->prepare($sql);
+            // sssdsisi = string, string, string, double, string, integer, string, integer
+            $stmt->bind_param("sssdsisi", $nombre, $marca, $modelo, $precio, $detalles, $unidades, $imagen, $id);
 
-            $this->conexion->set_charset("utf8");
-
-            if ($this->conexion->query($sql)) {
+            if ($stmt->execute()) {
                 $this->data['status'] = "success";
                 $this->data['message'] = "Producto actualizado";
             } else {
-                $this->data['message'] = "ERROR: No se ejecutó $sql. " . $this->conexion->error;
+                $this->data['error'] = "ERROR: " . $stmt->error;
             }
-
-            $this->conexion->close();
+            $stmt->close();
         }
     }
 
-    public function name($getData) {
-        if (isset($getData['name'])) {
-            $name = $this->conexion->real_escape_string($getData['name']);
-
-            $sql = "SELECT COUNT(*) as count FROM productos WHERE nombre = '{$name}' AND eliminado = 0";
-            $result = $this->conexion->query($sql);
-
-            if ($result) {
-                $row = $result->fetch_assoc();
-
-                if ($row['count'] > 0) {
-                    $this->data['status'] = 'error';
-                    $this->data['message'] = 'El nombre del producto ya existe.';
-                } else {
-                    $this->data['status'] = 'success';
-                    $this->data['message'] = 'Nombre disponible.';
-                }
-
-                $result->free();
-            } else {
-                $this->data['message'] = "ERROR: No se pudo ejecutar la consulta. " . $this->conexion->error;
-            }
-
-            $this->conexion->close();
-        }
-    }
-
+    // +search(string): void
     public function search($getData) {
-        if (isset($getData['search'])) {
-            $search = $this->conexion->real_escape_string($getData['search']);
-
-            $sql = "SELECT * FROM productos 
-                    WHERE (id = '{$search}' 
-                    OR nombre LIKE '%{$search}%' 
-                    OR marca LIKE '%{$search}%' 
-                    OR detalles LIKE '%{$search}%') 
-                    AND eliminado = 0";
-
-            if ($result = $this->conexion->query($sql)) {
-                $rows = $result->fetch_all(MYSQLI_ASSOC);
-
-                if (!is_null($rows)) {
-                    foreach ($rows as $num => $row) {
-                        foreach ($row as $key => $value) {
-                            $this->data[$num][$key] = utf8_encode($value);
-                        }
-                    }
-                }
-
-                $result->free();
-            } else {
-                die('Query Error: ' . $this->conexion->error);
-            }
-
-            $this->conexion->close();
+        $search = $getData['search'] ?? '';
+        $like_search = "%{$search}%";
+        
+        $sql = "SELECT * FROM productos 
+                WHERE (id = ? OR nombre LIKE ? OR marca LIKE ? OR detalles LIKE ?) 
+                AND eliminado = 0";
+        $stmt = $this->conexion->prepare($sql);
+        // ssss = string, string, string, string
+        $stmt->bind_param("ssss", $search, $like_search, $like_search, $like_search);
+        
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            $this->data = $result->fetch_all(MYSQLI_ASSOC);
+            $result->free();
+        } else {
+            $this->data['error'] = 'Query Error: ' . $stmt->error;
         }
+        $stmt->close();
     }
 
+    // +single(string): void
     public function single($postData) {
-        if (isset($postData['id'])) {
-            $id = intval($postData['id']); 
-
-            $sql = "SELECT * FROM productos WHERE id = {$id}";
-
-            if ($result = $this->conexion->query($sql)) {
-                $row = $result->fetch_assoc();
-
-                if (!is_null($row)) {
-                    foreach ($row as $key => $value) {
-                        $this->data[$key] = utf8_encode($value);
-                    }
-                }
-
+        $id = $postData['id'] ?? 0;
+        if ($id > 0) {
+            $sql = "SELECT * FROM productos WHERE id = ?";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param("i", $id);
+            
+            if ($stmt->execute()) {
+                $result = $stmt->get_result();
+                $this->data = $result->fetch_assoc(); // Solo un resultado
                 $result->free();
             } else {
-                die('Query Error: ' . $this->conexion->error);
+                $this->data['error'] = 'Query Error: ' . $stmt->error;
             }
-
-            $this->conexion->close();
+            $stmt->close();
         }
     }
 
+    // +singleByName(string): void
+    public function singleByName($name) {
+        $sql = "SELECT * FROM productos WHERE nombre = ? AND eliminado = 0";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("s", $name);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            $this->data = $result->fetch_assoc();
+            $result->free();
+        } else {
+            $this->data['error'] = 'Query Error: ' . $stmt->error;
+        }
+        $stmt->close();
+    }
+    
+
+    public function checkNameExists($getData) {
+        $name = $getData['name'] ?? '';
+        
+        $sql = "SELECT COUNT(*) as count FROM productos WHERE nombre = ? AND eliminado = 0";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("s", $name);
+
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            if ($row['count'] > 0) {
+                $this->data['status'] = 'error';
+                $this->data['message'] = 'El nombre del producto ya existe.';
+            } else {
+                $this->data['status'] = 'success';
+                $this->data['message'] = 'Nombre disponible.';
+            }
+            $result->free();
+        } else {
+            $this->data['error'] = "ERROR: " . $stmt->error;
+        }
+        $stmt->close();
+    }
+
+    // +getData(): string
     public function getData() {
         return json_encode($this->data, JSON_PRETTY_PRINT);
     }
