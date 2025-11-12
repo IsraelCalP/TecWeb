@@ -1,15 +1,15 @@
 <?php
-    include_once __DIR__.'/database.php';
+    require_once __DIR__ . '/myapi/Products.php';
 
-    // SE CREA EL ARREGLO QUE SE VA A DEVOLVER EN FORMA DE JSON
-    $data = array();
+    /* SE CREA EL ARREGLO QUE SE VA A DEVOLVER EN FORMA DE JSON
+    //$data = array();
 
     // SE REALIZA LA QUERY DE BÚSQUEDA Y AL MISMO TIEMPO SE VALIDA SI HUBO RESULTADOS
-    if ( $result = $conexion->query("SELECT * FROM productos WHERE eliminado = 0") ) {
+    //if ( $result = $conexion->query("SELECT * FROM productos WHERE eliminado = 0") ) {
         // SE OBTIENEN LOS RESULTADOS
-        $rows = $result->fetch_all(MYSQLI_ASSOC);
+        //$rows = $result->fetch_all(MYSQLI_ASSOC);
 
-        if(!is_null($rows)) {
+        //if(!is_null($rows)) {
             // SE CODIFICAN A UTF-8 LOS DATOS Y SE MAPEAN AL ARREGLO DE RESPUESTA
             foreach($rows as $num => $row) {
                 foreach($row as $key => $value) {
@@ -24,5 +24,24 @@
     $conexion->close();
     
     // SE HACE LA CONVERSIÓN DE ARRAY A JSON
-    echo json_encode($data, JSON_PRETTY_PRINT);
+    echo json_encode($data, JSON_PRETTY_PRINT); */
+
+header('Content-Type: application/json');
+
+try {
+    // 3. Crear una instancia de la clase Products 
+    $productos = new Products("marketzone", "root", "Isra2818"); 
+
+    // 4. Usar el método correcto 
+    $productos->list();
+
+    // 5. Devolver la respuesta en formato JSON 
+    echo $productos->getData();
+
+} catch (Exception $e) {
+    echo json_encode(['error' => $e->getMessage()]);
+}
+?>
+
+
 ?>
