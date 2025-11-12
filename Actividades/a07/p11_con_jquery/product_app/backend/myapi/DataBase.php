@@ -17,7 +17,6 @@ abstract class DataBase {
             die('Base de datos NO encontrada: ' . mysqli_connect_error());
         }
 
-        //la conexión trabaje en UTF-8
         $this->conexion->set_charset('utf8');
     }
 
