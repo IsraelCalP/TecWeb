@@ -87,7 +87,7 @@ $(document).ready(function(){
             url: './backend/product-list.php',
             type: 'GET',
             success: function(response) {
-                const productos = JSON.parse(response);
+                const productos =response;
                 if(Object.keys(productos).length > 0) {
                     let template = '';
                     productos.forEach(producto => {
@@ -126,7 +126,7 @@ $(document).ready(function(){
                 type: 'GET',
                 success: function (response) {
                     if(!response.error) {
-                        const productos = JSON.parse(response);
+                        const productos = response;
                         if(Object.keys(productos).length > 0) {
                             let template = '';
                             let template_bar = '';
@@ -208,7 +208,7 @@ $(document).ready(function(){
         const url = edit === false ? './backend/product-add.php' : './backend/product-edit.php';
         
         $.post(url, postData, (response) => {
-            let respuesta = JSON.parse(response);
+            let respuesta = response;
             
             // (Task 6) Se usa la función de status para mostrar la respuesta del servidor
             let isError = (respuesta.status !== 'success');
@@ -229,22 +229,33 @@ $(document).ready(function(){
         });
     });
 
-    $(document).on('click', '.product-delete', (e) => {
-        if(confirm('¿Realmente deseas eliminar el producto?')) {
-            const element = $(this)[0].activeElement.parentElement.parentElement;
-            const id = $(element).attr('productId');
-            $.post('./backend/product-delete.php', {id}, (response) => {
-                $('#product-result').hide();
-                listarProductos();
-            });
-        }
-    });
+   $(document).on('click', '.product-delete', function(e) { 
+    if(confirm('¿Realmente deseas eliminar el producto?')) {
+        const id = $(this).closest('tr').attr('productId'); 
+        
+        $.post('./backend/product-delete.php', {id}, (response) => {
+            
+            // --- CÓDIGO CORREGIDO ---
+            
+            // 1. Leemos la respuesta del servidor
+            let respuesta = response;
+            let isError = (respuesta.status !== 'success');
+
+            // 2. Usamos showStatus() para mostrar el mensaje
+            //    (ej: "Producto eliminado")
+            showStatus(respuesta.message, isError);
+            
+            // 3. Recargamos la lista
+            listarProductos();
+        });
+    }
+});
 
     $(document).on('click', '.product-item', (e) => {
         const element = $(this)[0].activeElement.parentElement.parentElement;
         const id = $(element).attr('productId');
         $.post('./backend/product-single.php', {id}, (response) => {
-            let product = JSON.parse(response);
+            let product = response;
             
             // (Task 5) Se insertan los datos en los nuevos campos
             $('#name').val(product.nombre);
