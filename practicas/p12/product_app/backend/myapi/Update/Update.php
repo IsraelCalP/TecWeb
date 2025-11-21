@@ -6,7 +6,7 @@ use TECWEB\MYAPI\DataBase;
 class Update extends DataBase {
     protected $data;
 
-    public function __construct($db, $user='root', $pass='12345678a') {
+    public function __construct($db, $user='root', $pass='Isra2818') {
         $this->data = array();
         parent::__construct($db, $user, $pass);
     }
